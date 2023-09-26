@@ -1,0 +1,37 @@
+{% extends "curingapp/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block formcontent %}
+
+<h2>Create a New Project</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form|crispy}}
+  <div class="d-inline">
+    <button type="submit" class="btn btn-primary">Create Project</button>
+    <a href="{% url 'home' %}" class="btn btn-primary">Back</a>
+  </div>
+</form>
+<hr>
+
+<h2>All Projects</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Project ID</th>
+      <th>Project Name</th>
+      <th>Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for project in projects %}
+    <tr>
+      <td>{{ project.Project_ID }}</td>
+      <td>{{ project.Project_Name }}</td>
+      <td><a href="{% url 'edit_project' project.Project_ID %}" class="btn btn-primary">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

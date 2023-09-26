@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Open Camera and Capture Photo</title>
+    <style>
+        .camera-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .camera-feed {
+            transform: scaleX(-1);
+            /* Flip horizontally */
+        }
+    </style>
+</head>
+
+<body>
+    {% for schedule_entry in schedules %}
+    <div class="camera-container" data-schedule-id="{{ schedule_entry.Schedule_Curing_ID }}">
+        <h3>Schedule ID: {{ schedule_entry.Schedule_Curing_ID }}</h3>
+        <button class="open-camera-button">Open Camera</button>
+        <button class="capture-photo-button" disabled>Capture Photo</button>
+        <button class="download-button" disabled>Download Photo</button>
+        <video class="camera-feed" autoplay></video>
+        <canvas class="photo-canvas" style="display: none;"></canvas>
+        <img class="captured-photo" alt="Captured Photo" style="display: none;">
+    </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cameraContainers = document.querySelectorAll('.camera-container');
+
+            cameraContainers.forEach(container => {
+                const openCameraButton = container.querySelector('.open-camera-button');
+                const capturePhotoButton = container.querySelector('.capture-photo-button');
+                const captureScreenButton = container.querySelector('.capture-screen-button'); // New button
+                const downloadButton = container.querySelector('.download-button');
+                const cameraFeed = container.querySelector('.camera-feed');
+                const photoCanvas = container.querySelector('.photo-canvas');
+                const capturedPhoto = container.querySelector('.captured-photo');
+                const capturedScreen = document.querySelector('.captured-screen'); // Element to display captured screen
+                let mediaStream = null;
+                let screenStream = null; // Track the screen capture stream
+
+                // Function to enable the download button and create a download link for the camera feed
+                function enableDownloadButton() {
+                    downloadButton.disabled = false;
+                    downloadButton.addEventListener('click', () => {
+                        const a = document.createElement('a');
+                        a.href = capturedPhoto.src;
+                        a.download = `captured_photo_${container.dataset.scheduleId}.png`;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    });
+                }
+
+                // Function to start the camera feed
+                async function startCamera() {
+                    try {
+                        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        cameraFeed.srcObject = mediaStream;
+                        capturePhotoButton.disabled = false;
+                    } catch (error) {
+                        console.error('Error accessing camera:', error);
+                    }
+                }
+
+                // Function to stop the camera feed
+                function stopCamera() {
+                    if (mediaStream) {
+                        mediaStream.getTracks().forEach(track => track.stop());
+                        cameraFeed.srcObject = null;
+                        capturePhotoButton.disabled = true;
+                    }
+                }
+
+                openCameraButton.addEventListener('click', async () => {
+                    stopCamera();
+                    await startCamera();
+                });
+
+                capturePhotoButton.addEventListener('click', () => {
+                    if (mediaStream) {
+                        const context = photoCanvas.getContext('2d');
+                        context.drawImage(cameraFeed, 0, 0, photoCanvas.width, photoCanvas.height);
+                        capturedPhoto.src = photoCanvas.toDataURL('image/png');
+                        capturedPhoto.style.display = 'block';
+                        photoCanvas.style.display = 'none';
+                        cameraFeed.style.display = 'none';
+                        capturePhotoButton.disabled = true;
+                        enableDownloadButton();
+                        stopCamera();
+                    }
+                });
+
+                // Function to capture the screen
+                async function captureScreen() {
+                    try {
+                        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                        capturedScreen.srcObject = screenStream;
+                    } catch (error) {
+                        console.error('Error capturing screen:', error);
+                    }
+                }
+
+                captureScreenButton.addEventListener('click', async () => {
+                    await captureScreen();
+                });
+            });
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+{% extends 'curingapp/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block formcontent %}
+<h2>Edit User</h2>
+<form method="post">
+  {% csrf_token %}
+  
+  <div class="form-group">
+    <label for="{{ form.Email.id_for_label }}">Email:</label>
+    {{ form.Email|as_crispy_field }}
+  </div>
+
+  <div class="form-group">
+    <label for="{{ form.Username.id_for_label }}">Username:</label>
+    {{ form.username|as_crispy_field }}
+  </div>
+
+  <div class="form-group">
+    <label for="{{ form.Contact_no.id_for_label }}">Contact Number:</label>
+    {{ form.Contact_no|as_crispy_field }}
+  </div>
+
+  <div class="form-group">
+    <label for="{{ form.is_user.id_for_label }}"></label>
+    {{ form.is_user|as_crispy_field }}
+  </div>
+  <div class="form-group">
+    <label for="{{ form.is_Administrator.id_for_label }}"></label>
+    {{ form.is_Administrator|as_crispy_field }}
+  </div>
+
+  <div class="form-group">
+    <label for="projectSelect">Project:</label>
+    <select id="projectSelect" name="Project" class="form-control" onchange="updateSiteOptions()">
+        {% for project in Projects %}
+            <option value="{{ project.Project_ID }}">{{ project.Project_Name }}</option>
+        {% endfor %}
+    </select>
+    {% if form.Project.errors %}
+        <span class="help-block">{{ form.Project.errors }}</span>
+    {% endif %}
+  </div>
+
+  <div class="form-group">
+    <label for="siteSelect">Site:</label>
+    <select id="siteSelect" name="Site" class="form-control">
+        <option value="" disabled selected>Select a Project first</option>
+    </select>
+    {% if form.Site.errors %}
+        <span class="help-block">{{ form.Site.errors }}</span>
+    {% endif %}
+  </div>
+
+  {{ form.errors }}
+
+  <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+<a href="" class="btn btn-secondary mt-2">Cancel</a>
+
+<script>
+    function updateSiteOptions() {
+        var projectId = document.getElementById("projectSelect").value;
+        var siteSelect = document.getElementById("siteSelect");
+        var siteOptions = [
+            // Placeholder option
+            '<option value="" disabled selected>Select a Project first</option>'
+        ];
+
+        // Fetch sites for the selected project using an API endpoint
+        fetch(`/get_sites_for_project/${projectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                data.sites.forEach(site => {
+                    // Append site options to the list
+                    siteOptions.push(`<option value="${site.id}">${site.name}</option>`);
+                });
+                
+                // Set the innerHTML of the site dropdown to update options
+                siteSelect.innerHTML = siteOptions.join('');
+            });
+    }
+    
+    // Initial call to populate site options based on the default selection
+    updateSiteOptions();
+</script>
+{% endblock %}

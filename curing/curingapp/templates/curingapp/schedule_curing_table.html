@@ -1,0 +1,100 @@
+{% extends "curingapp/base.html" %}
+
+{% block formcontent %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    .curing-image {
+        width: 50px;
+        height: 50px;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Curing Table</title>
+</head>
+<body>
+  <h1>Schedule Curing Table</h1>
+
+  <h2>Transaction Concreting Information</h2>
+  <p>Transaction ID: {{ transaction.Transaction_Concreting_ID }}</p>
+  <p>Project: {{ transaction.Project }}</p>
+  <p>Site: {{ transaction.Site }}</p>
+  <p>Structural Element: {{ transaction.Structural_Element }}</p>
+
+  <h2>Curing Schedule Entries</h2>
+  <table class='table table-responsive'>
+    <thead>
+      <tr>
+        <th>Schedule Entry ID</th>
+        <th>Schedule Date and Time</th>
+        <th>Image</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for schedule_entry in schedules %}
+      <tr>
+        <td>{{ schedule_entry.Schedule_Curing_ID }}</td>
+        <td>{{ schedule_entry.Schedule_Date_and_Time }}</td>
+        <td>
+          {% if schedule_entry.Image_Of_Curing %}
+          <img src="{{ schedule_entry.Image_Of_Curing.url }}" alt="Curing Image" class="curing-image">
+          {% else %}
+          <form method="post" enctype="multipart/form-data" class="upload-form" data-schedule-id="{{ schedule_entry.Schedule_Curing_ID }}">
+              {% csrf_token %}
+              <input type="hidden" name="schedule_entry_id" value="{{ schedule_entry.Schedule_Curing_ID }}">
+              <label for="image-{{ schedule_entry.Schedule_Curing_ID }}">Choose File:</label>
+              <input type="file" name="image" id="image-{{ schedule_entry.Schedule_Curing_ID }}">
+              <button type="submit">Upload Image</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <!-- Include the script here -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadForms = document.querySelectorAll('.upload-form');
+
+        uploadForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const scheduleID = form.getAttribute('data-schedule-id');
+                const formData = new FormData(form);
+
+                fetch('/upload_image/', {  // Replace with your upload URL
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Replace the form with the uploaded image
+                        const imageElement = document.createElement('img');
+                        imageElement.src = data.image_url;
+                        imageElement.alt = 'Curing Image';
+                        imageElement.className = 'curing-image';
+
+                        const td = form.parentElement;
+                        td.innerHTML = '';
+                        td.appendChild(imageElement);
+                    } else {
+                        alert('Image upload failed.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Image upload failed.');
+                });
+            });
+        });
+    });
+  </script>
+</body>
+</html>
+
+{% endblock %}

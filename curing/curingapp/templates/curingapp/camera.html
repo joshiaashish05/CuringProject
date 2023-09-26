@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Open Camera and Capture Photo</title>
+    <style>
+        #cameraFeed {
+            transform: scaleX(-1);
+            /* Flip horizontally */
+        }
+    </style>
+</head>
+
+<body>
+    <button id="openCameraButton">Open Camera</button>
+    <button id="capturePhotoButton" disabled>Capture Photo</button>
+    <button id="downloadButton" disabled>Download Photo</button>
+    <video id="cameraFeed" autoplay></video>
+    <canvas id="photoCanvas" style="display: none;"></canvas>
+    <img id="capturedPhoto" alt="Captured Photo" style="display: none;">
+
+    <script>
+        const openCameraButton = document.getElementById('openCameraButton');
+        const capturePhotoButton = document.getElementById('capturePhotoButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const photoCanvas = document.getElementById('photoCanvas');
+        const capturedPhoto = document.getElementById('capturedPhoto');
+        let mediaStream;
+
+        // Function to enable the download button and create a download link
+        function enableDownloadButton() {
+            downloadButton.disabled = false;
+            downloadButton.addEventListener('click', () => {
+                const a = document.createElement('a');
+                a.href = capturedPhoto.src;
+                a.download = 'captured_photo.png';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+
+        openCameraButton.addEventListener('click', async () => {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraFeed.srcObject = mediaStream;
+                capturePhotoButton.disabled = false;
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+            }
+        });
+
+        capturePhotoButton.addEventListener('click', () => {
+            if (mediaStream) {
+                const context = photoCanvas.getContext('2d');
+                context.drawImage(cameraFeed, 0, 0, photoCanvas.width, photoCanvas.height);
+                capturedPhoto.src = photoCanvas.toDataURL('image/png');
+                capturedPhoto.style.display = 'block';
+                photoCanvas.style.display = 'none';
+                cameraFeed.style.display = 'none';
+                capturePhotoButton.disabled = true;
+                enableDownloadButton(); // Enable the download button
+            }
+        });
+    </script>
+</body>
+
+</html>

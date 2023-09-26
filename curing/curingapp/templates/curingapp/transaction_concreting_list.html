@@ -1,0 +1,66 @@
+{% extends "curingapp/base.html" %}
+
+<!DOCTYPE html>
+
+<html>
+
+{% block formcontent %}
+    
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Concreting List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Transaction Concreting List</h1>
+    </header>
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Project</th>
+                    <th>Site</th>
+                    <th>Structural Element</th>
+                    <th>Schedule Date and Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through the list of transactions -->
+                {% for transaction in transactions %}
+                <tr>
+                    <td>
+                        <!-- Create a link to the 'schedule_curing_table' page with the transaction's primary key -->
+                        <a href="{% url 'schedule_curing_table' transaction.pk %}">
+                            {{ transaction.Transaction_Concreting_ID }}
+                        </a>
+                    </td>
+                    <td>{{ transaction.Project }}</td>
+                    <td>{{ transaction.Site }}</td>
+                    <td>{{ transaction.Structural_Element }}</td>
+                    <td>{{ transaction.Schedule_Date_and_Time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+    <a href="{% url 'home'  %}" class="btn btn-primary">Back</a>
+{% endblock %}
+
+</body>
+
+</html>

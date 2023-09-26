@@ -1,0 +1,56 @@
+{% extends 'curingapp/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block formcontent %}
+<h5>Register User </h5>
+<form method="POST">
+  {% csrf_token %}
+  <div>
+    <div>
+      {{ form | crispy }}
+    </div>
+  </div>
+  <button class="btn btn-primary">Submit</button>
+</form>
+{% if messages %}
+<div class="alert alert-success mt-3" role="alert">
+  {% for message in messages %}
+  {{ message }}
+  {% endfor %}
+</div>
+{% endif %}
+<hr>
+<h2>All Registered User</h2>
+<table class="table">
+  <thead>
+      <tr>
+          <th>User ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Contact Number</th>
+          <th>Project</th>
+          <th>Site</th>
+          <th>Is User</th>
+          <th>Is Administrator</th>
+          <th>Edit</th>
+      </tr>
+  </thead>
+  <tbody>
+      {% for user in custom_users %}
+      <tr>
+          <td>{{ user.User_ID }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.Email }}</td>
+          <td>{{ user.Contact_no }}</td>
+          <td>{{ user.Project }}</td>
+          <td>{{ user.Site }}</td>
+          <td>{{ user.is_user }}</td>
+          <td>{{ user.is_Administrator }}</td>
+          <td><a class="btn btn-primary" href="{% url 'edit_user' user.User_ID %}">Edit</a></td>  <!-- Add an Edit link -->
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
+
+
+{% endblock%}

@@ -1,0 +1,14 @@
+{% extends "curingapp/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block formcontent %}
+<h2>Edit Project</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form|crispy }}
+  <div class="d-inline">
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="{% url 'home' %}" class="btn btn-primary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
